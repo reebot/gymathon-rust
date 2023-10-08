@@ -1,41 +1,52 @@
-use sqlx::postgres::PgRow;
-use sqlx::Connection;
-use sqlx::Row;
+use sqlx::postgres::PgPool;
 use std::env;
 use dotenv::dotenv;
 use chrono::{NaiveDate, NaiveTime};
 use serde::Deserialize;
+use tokio;
 
 #[derive(Debug, Deserialize)]
-pub struct Booking {
+pub struct Activity {
     pub id: String,
-    pub center_id: i32,
+    pub activity_type: String,
     pub name: String,
-    pub booking_date: NaiveDate,
+    pub description: String,
+    pub seat_booking: String,
+    pub waiting_list_capacity: i32,
+    pub center_id: i32,
+    pub center_name: String,
+    pub person_center_id: i32,
+    pub date: NaiveDate,
     pub start_time: NaiveTime,
     pub end_time: NaiveTime,
     pub duration_minutes: i32,
-    pub activity_id: String,
-    pub booking_status: String,
-    pub provider: String,
-    pub room_name: String,
-    pub center_name: String,
-    pub description: String,
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
     let url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let mut conn = sqlx::PgConnection::connect(&url).await?;
+    let pool = PgPool::connect(&url).await?;
 
-    // Example query to fetch a booking by id
-    let row: (String,) = sqlx::query_as("SELECT name FROM bookings WHERE id = $1")
-        .bind("1") // replace with the id you're searching for
-        .fetch_one(&mut conn)
+    // Parse the string into a NaiveDate object
+    let date = "2023-10-08".parse::<NaiveDate>()?;
+
+    // Query to fetch all activities on a specific date
+    let rows = sqlx::query!(
+        r#"
+        SELECT * FROM activity WHERE date = $1
+        "#,
+        date
+    )
+        .fetch_all(&pool)
         .await?;
 
-    println!("Booking Name: {:?}", row.0);
+    for row in rows {
+        println!(
+            "Activity Name: {}, Description: {:?}, Start Time: {}",
+            row.name, row.description, row.start_time
+        );
+    }
 
     Ok(())
 }
