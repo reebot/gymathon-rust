@@ -1,40 +1,52 @@
-// Import necessary modules and crates
-mod database;
-mod model;
-mod routes;
-mod schema;
-mod errors;
-
-#[macro_use]
-extern crate diesel;
-extern crate dotenv;
-
-use actix_web::{web, App, HttpServer};
-use dotenv::dotenv;
+use sqlx::postgres::PgPool;
 use std::env;
+use dotenv::dotenv;
+use chrono::{NaiveDate, NaiveTime};
+use serde::Deserialize;
+use tokio;
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
-    // Load environment variables from .env file
+#[derive(Debug, Deserialize)]
+pub struct Activity {
+    pub id: String,
+    pub activity_type: String,
+    pub name: String,
+    pub description: String,
+    pub seat_booking: String,
+    pub waiting_list_capacity: i32,
+    pub center_id: i32,
+    pub center_name: String,
+    pub person_center_id: i32,
+    pub date: NaiveDate,
+    pub start_time: NaiveTime,
+    pub end_time: NaiveTime,
+    pub duration_minutes: i32,
+}
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
+    let url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let pool = PgPool::connect(&url).await?;
 
-    // Setup logging
-    env::set_var("RUST_LOG", "actix_web=info");
-    env_logger::init();
+    // Parse the string into a NaiveDate object
+    let date = "2023-10-08".parse::<NaiveDate>()?;
 
-    // Initialize database connection pool
-    let pool = database::init_pool();
+    // Query to fetch all activities on a specific date
+    let rows = sqlx::query!(
+        r#"
+        SELECT * FROM activity WHERE date = $1
+        "#,
+        date
+    )
+        .fetch_all(&pool)
+        .await?;
 
-    // Start HTTP server
-    HttpServer::new(move || {
-        App::new()
-            .data(pool.clone()) // Pass database pool to application
-            .service(
-                web::resource("/api/v1/bookings")
-                    .route(web::get().to(routes::bookings_route)),
-            )
-    })
-        .bind("127.0.0.1:8080")?
-        .run()
-        .await
+    for row in rows {
+        println!(
+            "Activity Name: {}, Description: {:?}, Start Time: {}",
+            row.name, row.description, row.start_time
+        );
+    }
+
+    Ok(())
 }
