@@ -87,18 +87,19 @@ function displayData(data) {
     const dayAfterTomorrow = new Date(today);
     dayAfterTomorrow.setDate(today.getDate() + 2);
 
-    const dateBoxes = [
-        { date: today, label: 'Today' },
-        { date: tomorrow, label: 'Tomorrow' },
-        { date: dayAfterTomorrow, label: 'Day after Tomorrow' },
+        const dateBoxes = [
+            { date: today, label: 'Today',id: 'todayBtn'  },
+            { date: tomorrow, label: 'Tomorrow',id: 'tomorrowBtn' },
+            { date: dayAfterTomorrow, label: 'Day after Tomorrow',id: 'dayAfterTomorrowBtn'  },
     ];
 
     const dateBoxContainer = document.createElement('div');
         dateBoxContainer.className = 'date-box-container';
 
-    dateBoxes.forEach(({ date, label }) => {
-        const dateBox = document.createElement('div');
+    dateBoxes.forEach(({ date, label, id }) => {
+        const dateBox = document.createElement('button');
         dateBox.className = 'date-box';
+        dateBox.id = id;
         dateBox.textContent = `${formatDate(date)}`;
         dataContainer.appendChild(dateBox);
     });
@@ -140,9 +141,18 @@ function displayData(data) {
             nameTd.textContent = nameCenter;
             row.appendChild(nameTd);
 
-            times = times.join(', '); // Assign new value to times instead of redeclaring
+            const timesContainer = document.createElement('div');
+            timesContainer.className = 'times-container';
+
+            times.forEach(time => {
+                const timeBox = document.createElement('div');
+                timeBox.className = 'time-box';
+                timeBox.textContent = time;
+                timesContainer.appendChild(timeBox);
+            });
+
             const timeTd = document.createElement('td');
-            timeTd.textContent = times;
+            timeTd.appendChild(timesContainer);
             row.appendChild(timeTd);
 
             tbody.appendChild(row);
