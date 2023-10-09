@@ -75,9 +75,34 @@ function displayData(data) {
     const dataContainer = document.getElementById('dataContainer');
     dataContainer.innerHTML = '';
 
-    const dateLabel = document.createElement('p');
-    dateLabel.textContent = `Date: ${data[0].date}`;
-    dataContainer.appendChild(dateLabel);
+    function formatDate(date) {
+        const day = date.toLocaleString('default', { day: '2-digit' });
+        const month = date.toLocaleString('default', { month: 'short' });
+        return `${day} ${month}`;
+    }
+
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    const dayAfterTomorrow = new Date(today);
+    dayAfterTomorrow.setDate(today.getDate() + 2);
+
+    const dateBoxes = [
+        { date: today, label: 'Today' },
+        { date: tomorrow, label: 'Tomorrow' },
+        { date: dayAfterTomorrow, label: 'Day after Tomorrow' },
+    ];
+
+    const dateBoxContainer = document.createElement('div');
+        dateBoxContainer.className = 'date-box-container';
+
+    dateBoxes.forEach(({ date, label }) => {
+        const dateBox = document.createElement('div');
+        dateBox.className = 'date-box';
+        dateBox.textContent = `${formatDate(date)}`;
+        dataContainer.appendChild(dateBox);
+    });
+    dataContainer.appendChild(dateBoxContainer);
 
     const table = document.createElement('table');
     dataContainer.appendChild(table);
@@ -108,20 +133,20 @@ function displayData(data) {
             groupedActivities[key].push(activity.startTime);
         });
 
-       Object.entries(groupedActivities).forEach(([nameCenter, times]) => {
-           const row = document.createElement('tr');
+        Object.entries(groupedActivities).forEach(([nameCenter, times]) => {
+            const row = document.createElement('tr');
 
-           const nameTd = document.createElement('td');
-           nameTd.textContent = nameCenter;
-           row.appendChild(nameTd);
+            const nameTd = document.createElement('td');
+            nameTd.textContent = nameCenter;
+            row.appendChild(nameTd);
 
-           times = times.join(', '); // Assign new value to times instead of redeclaring
-           const timeTd = document.createElement('td');
-           timeTd.textContent = times;
-           row.appendChild(timeTd);
+            times = times.join(', '); // Assign new value to times instead of redeclaring
+            const timeTd = document.createElement('td');
+            timeTd.textContent = times;
+            row.appendChild(timeTd);
 
-           tbody.appendChild(row);
-       });
+            tbody.appendChild(row);
+        });
 
     } else {
         dataContainer.innerHTML = '<p>No activities available.</p>';
