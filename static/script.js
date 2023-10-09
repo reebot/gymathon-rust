@@ -14,11 +14,10 @@ async function fetchData() {
     }
 }
 
-function displayData(data) {
+/*function displayData(data) {
     const dataContainer = document.getElementById('dataContainer');
     dataContainer.innerHTML = '';
 
-    // Displaying Date below the Fetch Data Button
     const dateLabel = document.createElement('p');
     dateLabel.textContent = `Date: ${data[0].date}`;
     dataContainer.appendChild(dateLabel);
@@ -41,25 +40,94 @@ function displayData(data) {
         const tbody = document.createElement('tbody');
         table.appendChild(tbody);
 
+        let groupedActivities = {};
+
         data.forEach(activity => {
+            const key = `${activity.name} (${activity.centerName})`;
+
+            if (!groupedActivities[key]) {
+                groupedActivities[key] = [];
+            }
+            groupedActivities[key].push(activity.startTime);
+        });
+
+        Object.entries(groupedActivities).forEach(([nameCenter, times]) => {
             const row = document.createElement('tr');
 
-            // Name + Centre Name column
             const nameTd = document.createElement('td');
-            nameTd.textContent = `${activity.name} (${activity.centerName})`; // Corrected property name
+            nameTd.textContent = nameCenter;
             row.appendChild(nameTd);
 
-            // Starting time column
-            const timeTd = document.createElement('td');
-            timeTd.textContent = activity.startTime; // Corrected property name
-            row.appendChild(timeTd);
+            times.forEach(time => {
+                const timeTd = document.createElement('td');
+                timeTd.textContent = time;
+                row.appendChild(timeTd);
+            });
 
             tbody.appendChild(row);
         });
     } else {
         dataContainer.innerHTML = '<p>No activities available.</p>';
     }
+}*/
+
+function displayData(data) {
+    const dataContainer = document.getElementById('dataContainer');
+    dataContainer.innerHTML = '';
+
+    const dateLabel = document.createElement('p');
+    dateLabel.textContent = `Date: ${data[0].date}`;
+    dataContainer.appendChild(dateLabel);
+
+    const table = document.createElement('table');
+    dataContainer.appendChild(table);
+
+    const headers = ['Name + Centre Name', 'Starting Time'];
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    headers.forEach(header => {
+        const th = document.createElement('th');
+        th.textContent = header;
+        headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    if (Array.isArray(data) && data.length > 0) {
+        const tbody = document.createElement('tbody');
+        table.appendChild(tbody);
+
+        let groupedActivities = {};
+
+        data.forEach(activity => {
+            const key = `${activity.name} (${activity.centerName})`;
+
+            if (!groupedActivities[key]) {
+                groupedActivities[key] = [];
+            }
+            groupedActivities[key].push(activity.startTime);
+        });
+
+       Object.entries(groupedActivities).forEach(([nameCenter, times]) => {
+           const row = document.createElement('tr');
+
+           const nameTd = document.createElement('td');
+           nameTd.textContent = nameCenter;
+           row.appendChild(nameTd);
+
+           times = times.join(', '); // Assign new value to times instead of redeclaring
+           const timeTd = document.createElement('td');
+           timeTd.textContent = times;
+           row.appendChild(timeTd);
+
+           tbody.appendChild(row);
+       });
+
+    } else {
+        dataContainer.innerHTML = '<p>No activities available.</p>';
+    }
 }
+
 
 function bookActivity(activityId) {
     alert(`Booking activity with ID: ${activityId}`);
