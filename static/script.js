@@ -134,28 +134,33 @@ function displayData(data) {
             groupedActivities[key].push(activity.startTime);
         });
 
-        Object.entries(groupedActivities).forEach(([nameCenter, times]) => {
-            const row = document.createElement('tr');
+         Object.entries(groupedActivities).forEach(([nameCenter, times]) => {
+                    const row = document.createElement('tr');
 
-            const nameTd = document.createElement('td');
-            nameTd.textContent = nameCenter;
-            row.appendChild(nameTd);
+                    const nameTd = document.createElement('td');
+                    nameTd.textContent = nameCenter;
+                    row.appendChild(nameTd);
 
-            const timesContainer = document.createElement('div');
-            timesContainer.className = 'times-container';
+                    const timesContainer = document.createElement('div');
+                    timesContainer.className = 'times-container';
 
-            times.forEach(time => {
-                const timeBox = document.createElement('div');
-                timeBox.className = 'time-box';
-                timeBox.textContent = time;
-                timesContainer.appendChild(timeBox);
-            });
+                    times.forEach((time, timeIndex) => {
+                        const timeBox = document.createElement('button');
+                        timeBox.className = 'time-box';
+                        timeBox.textContent = time;
+                        timeBox.onclick = () => bookActivity(timeIndex);
+                        timeBox.addEventListener('click', () => {
+                            // Add your functionality here
+                            console.log(`Clicked on ${time}`);
+                        });
+                        timesContainer.appendChild(timeBox);
+                    });
 
-            const timeTd = document.createElement('td');
-            timeTd.appendChild(timesContainer);
-            row.appendChild(timeTd);
+                    const timeTd = document.createElement('td');
+                    timeTd.appendChild(timesContainer);
+                    row.appendChild(timeTd);
 
-            tbody.appendChild(row);
+                    tbody.appendChild(row);
         });
 
     } else {
@@ -164,11 +169,30 @@ function displayData(data) {
 }
 
 
-function bookActivity(activityId) {
-    alert(`Booking activity with ID: ${activityId}`);
+var modal = document.getElementById("myModal");
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+    modal.style.display = "none";
 }
 
-function showInfoPopup(description) {
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+
+function bookActivity(activityId) {
+    modal.style.display = "block"; // Show the modal
+    setTimeout(function() {
+        window.location.href = "http://localhost:63342/gymathon-rust/static/booking-confirmation.html"; // Redirect to booking confirmation page
+    }, 1000);
+}
+
+
+/*function showInfoPopup(description) {
     const overlay = document.createElement('div');
     overlay.className = 'overlay';
 
@@ -186,4 +210,4 @@ function showInfoPopup(description) {
     modal.appendChild(closeButton);
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
-}
+}*/
